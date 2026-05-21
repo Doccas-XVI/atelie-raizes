@@ -4,7 +4,7 @@ import { PageContainer } from "@/components/Header";
 export const Route = createFileRoute("/processo")({
   head: () => ({
     meta: [
-      { title: "Por que esse preço? — Ateliê Barro" },
+      { title: "Por que esse preço? — Ateliê Raízes" },
       {
         name: "description",
         content:
