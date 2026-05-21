@@ -14,7 +14,7 @@ import {
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
-      { title: "Meu pedido — Ateliê Barro" },
+      { title: "Meu pedido — Ateliê Raízes" },
       { name: "description", content: "Resumo e fechamento do pedido." },
     ],
   }),

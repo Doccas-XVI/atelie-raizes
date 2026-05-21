@@ -72,14 +72,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Ateliê Barro — cerâmica artesanal" },
+      { title: "Ateliê Raízes — cerâmica artesanal" },
       {
         name: "description",
         content:
           "Cerâmica feita à mão. Pronta entrega, encomendas personalizadas e o processo por trás de cada peça.",
       },
-      { name: "author", content: "Ateliê Barro" },
-      { property: "og:title", content: "Ateliê Barro — cerâmica artesanal" },
+      { name: "author", content: "Ateliê Raízes" },
+      { property: "og:title", content: "Ateliê Raízes — cerâmica artesanal" },
       { property: "og:description", content: "Peças feitas à mão, uma a uma." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

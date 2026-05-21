@@ -9,7 +9,7 @@ export function Header() {
     <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
         <Link to="/" className="flex items-baseline gap-2">
-          <span className="text-base font-semibold tracking-tight">Ateliê Barro</span>
+          <span className="text-base font-semibold tracking-tight">Ateliê Raízes</span>
           <span className="text-xs text-muted-foreground">cerâmica artesanal</span>
         </Link>
         <Link

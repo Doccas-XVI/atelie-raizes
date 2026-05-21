@@ -12,7 +12,7 @@ import {
 export const Route = createFileRoute("/personalizado")({
   head: () => ({
     meta: [
-      { title: "Encomendar personalizado — Ateliê Barro" },
+      { title: "Encomendar personalizado — Ateliê Raízes" },
       {
         name: "description",
         content: "Monte sua peça personalizada: tipo, esmalte e descrição.",

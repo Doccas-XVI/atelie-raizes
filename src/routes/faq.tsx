@@ -5,7 +5,7 @@ import { PageContainer } from "@/components/Header";
 export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
-      { title: "Dúvidas frequentes — Ateliê Barro" },
+      { title: "Dúvidas frequentes — Ateliê Raízes" },
       {
         name: "description",
         content: "Respostas diretas para as perguntas mais comuns sobre as peças e o atendimento.",

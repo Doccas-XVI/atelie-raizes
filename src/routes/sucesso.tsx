@@ -7,7 +7,7 @@ export const Route = createFileRoute("/sucesso")({
   }),
   head: () => ({
     meta: [
-      { title: "Pedido enviado — Ateliê Barro" },
+      { title: "Pedido enviado — Ateliê Raízes" },
       { name: "description", content: "Pedido recebido. Próximos passos." },
     ],
   }),

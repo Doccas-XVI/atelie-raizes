@@ -17,7 +17,7 @@ const SENHA = "barro2026";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
-    meta: [{ title: "Painel — Ateliê Barro" }],
+    meta: [{ title: "Painel — Ateliê Raízes" }],
   }),
   component: Admin,
 });
@@ -92,7 +92,7 @@ function Painel() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-          <h1 className="text-base font-semibold">Painel · Ateliê Barro</h1>
+          <h1 className="text-base font-semibold">Painel · Ateliê Raízes</h1>
           <button
             onClick={() => setAdminAuth(false)}
             className="text-sm text-muted-foreground hover:underline"
