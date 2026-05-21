@@ -78,11 +78,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Cerâmica feita à mão. Pronta entrega, encomendas personalizadas e o processo por trás de cada peça.",
       },
-      { name: "author", content: "Ateliê Raízes" },
+      { name: "author", content: "Ateliê Barro" },
       { property: "og:title", content: "Ateliê Raízes — cerâmica artesanal" },
-      { property: "og:description", content: "Peças feitas à mão, uma a uma." },
+      { property: "og:description", content: "Web app for a ceramic studio to manage orders, showcase products, and educate customers." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Ateliê Raízes — cerâmica artesanal" },
+      { name: "description", content: "Web app for a ceramic studio to manage orders, showcase products, and educate customers." },
+      { name: "twitter:description", content: "Web app for a ceramic studio to manage orders, showcase products, and educate customers." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cd030415-7901-4796-a530-9e2ced905eaf/id-preview-a6d870be--a95dad33-cc10-459b-ba80-4b0d63c53edf.lovable.app-1779336008452.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/cd030415-7901-4796-a530-9e2ced905eaf/id-preview-a6d870be--a95dad33-cc10-459b-ba80-4b0d63c53edf.lovable.app-1779336008452.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
