@@ -9,8 +9,50 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SucessoRouteImport } from './routes/sucesso'
+import { Route as ProcessoRouteImport } from './routes/processo'
+import { Route as PersonalizadoRouteImport } from './routes/personalizado'
+import { Route as PecasRouteImport } from './routes/pecas'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SucessoRoute = SucessoRouteImport.update({
+  id: '/sucesso',
+  path: '/sucesso',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProcessoRoute = ProcessoRouteImport.update({
+  id: '/processo',
+  path: '/processo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PersonalizadoRoute = PersonalizadoRouteImport.update({
+  id: '/personalizado',
+  path: '/personalizado',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PecasRoute = PecasRouteImport.update({
+  id: '/pecas',
+  path: '/pecas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +61,130 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/checkout': typeof CheckoutRoute
+  '/faq': typeof FaqRoute
+  '/pecas': typeof PecasRoute
+  '/personalizado': typeof PersonalizadoRoute
+  '/processo': typeof ProcessoRoute
+  '/sucesso': typeof SucessoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/checkout': typeof CheckoutRoute
+  '/faq': typeof FaqRoute
+  '/pecas': typeof PecasRoute
+  '/personalizado': typeof PersonalizadoRoute
+  '/processo': typeof ProcessoRoute
+  '/sucesso': typeof SucessoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/checkout': typeof CheckoutRoute
+  '/faq': typeof FaqRoute
+  '/pecas': typeof PecasRoute
+  '/personalizado': typeof PersonalizadoRoute
+  '/processo': typeof ProcessoRoute
+  '/sucesso': typeof SucessoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/checkout'
+    | '/faq'
+    | '/pecas'
+    | '/personalizado'
+    | '/processo'
+    | '/sucesso'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin'
+    | '/checkout'
+    | '/faq'
+    | '/pecas'
+    | '/personalizado'
+    | '/processo'
+    | '/sucesso'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/checkout'
+    | '/faq'
+    | '/pecas'
+    | '/personalizado'
+    | '/processo'
+    | '/sucesso'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  CheckoutRoute: typeof CheckoutRoute
+  FaqRoute: typeof FaqRoute
+  PecasRoute: typeof PecasRoute
+  PersonalizadoRoute: typeof PersonalizadoRoute
+  ProcessoRoute: typeof ProcessoRoute
+  SucessoRoute: typeof SucessoRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sucesso': {
+      id: '/sucesso'
+      path: '/sucesso'
+      fullPath: '/sucesso'
+      preLoaderRoute: typeof SucessoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/processo': {
+      id: '/processo'
+      path: '/processo'
+      fullPath: '/processo'
+      preLoaderRoute: typeof ProcessoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/personalizado': {
+      id: '/personalizado'
+      path: '/personalizado'
+      fullPath: '/personalizado'
+      preLoaderRoute: typeof PersonalizadoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pecas': {
+      id: '/pecas'
+      path: '/pecas'
+      fullPath: '/pecas'
+      preLoaderRoute: typeof PecasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,17 +197,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  CheckoutRoute: CheckoutRoute,
+  FaqRoute: FaqRoute,
+  PecasRoute: PecasRoute,
+  PersonalizadoRoute: PersonalizadoRoute,
+  ProcessoRoute: ProcessoRoute,
+  SucessoRoute: SucessoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
