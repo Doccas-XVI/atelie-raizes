@@ -374,6 +374,7 @@ export type Database = {
           descricao: string | null
           estoque: number
           excluido_em: string | null
+          foto_url: string | null
           id: string
           nome: string
           ordem: number
@@ -389,6 +390,7 @@ export type Database = {
           descricao?: string | null
           estoque?: number
           excluido_em?: string | null
+          foto_url?: string | null
           id?: string
           nome: string
           ordem?: number
@@ -404,6 +406,7 @@ export type Database = {
           descricao?: string | null
           estoque?: number
           excluido_em?: string | null
+          foto_url?: string | null
           id?: string
           nome?: string
           ordem?: number

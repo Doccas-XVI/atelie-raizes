@@ -212,9 +212,19 @@ export function pagoStatus(p: PedidoCompleto): "pago" | "parcial" | "aguardando"
   return "parcial";
 }
 
+export type DadosCliente = {
+  nome: string;
+  whatsapp: string;
+  email?: string;
+  cep?: string;
+  endereco?: string;
+  cidade?: string;
+  estado?: string;
+  observacoes?: string;
+};
+
 export async function finalizarPedido(
-  nome: string,
-  whatsapp: string,
+  c: DadosCliente,
 ): Promise<{ id: string; codigo: string }> {
   const itens = getCart();
   if (itens.length === 0) throw new Error("Carrinho vazio");
@@ -227,7 +237,16 @@ export async function finalizarPedido(
 
   const { data: cliente, error: errC } = await supabase
     .from("clientes")
-    .insert({ nome, whatsapp })
+    .insert({
+      nome: c.nome,
+      whatsapp: c.whatsapp,
+      email: c.email || null,
+      cep: c.cep || null,
+      endereco: c.endereco || null,
+      cidade: c.cidade || null,
+      estado: c.estado || null,
+      observacoes: c.observacoes || null,
+    })
     .select("id")
     .single();
   if (errC) throw errC;

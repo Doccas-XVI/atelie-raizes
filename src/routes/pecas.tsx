@@ -55,8 +55,17 @@ function Card({ produto }: { produto: Produto }) {
 
   return (
     <article className="flex flex-col rounded-md border border-border bg-card">
-      <div className="flex h-40 items-center justify-center bg-surface text-4xl font-light text-muted-foreground">
-        <span aria-hidden>{inicial}</span>
+      <div className="flex h-48 items-center justify-center overflow-hidden bg-surface text-4xl font-light text-muted-foreground">
+        {produto.foto_url ? (
+          <img
+            src={produto.foto_url}
+            alt={produto.nome}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <span aria-hidden>{inicial}</span>
+        )}
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex items-baseline justify-between gap-2">
