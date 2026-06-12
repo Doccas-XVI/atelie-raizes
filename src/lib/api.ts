@@ -228,41 +228,11 @@ export async function finalizarPedido(
 ): Promise<{ id: string; codigo: string }> {
   const itens = getCart();
   if (itens.length === 0) throw new Error("Carrinho vazio");
-  const total = cartTotal(itens);
-  const prazo = cartPrazo(itens);
-  const temPronta = itens.some((i) => i.kind === "pronta");
-  const temPerso = itens.some((i) => i.kind === "personalizado");
-  const tipo: Database["public"]["Enums"]["pedido_tipo"] =
-    temPronta && temPerso ? "Misto" : temPerso ? "Personalizado" : "Pronta Entrega";
 
-  const { data: cliente, error: errC } = await supabase
-    .from("clientes")
-    .insert({
-      nome: c.nome,
-      whatsapp: c.whatsapp,
-      email: c.email || null,
-      cep: c.cep || null,
-      endereco: c.endereco || null,
-      cidade: c.cidade || null,
-      estado: c.estado || null,
-      observacoes: c.observacoes || null,
-    })
-    .select("id")
-    .single();
-  if (errC) throw errC;
-
-  const { data: pedido, error: errP } = await supabase
-    .from("pedidos")
-    .insert({ cliente_id: cliente.id, tipo, total, prazo_dias: prazo })
-    .select("id, codigo")
-    .single();
-  if (errP) throw errP;
-
-  const itensRows = itens.map((it) =>
+  const itensPayload = itens.map((it) =>
     it.kind === "pronta"
       ? {
-          pedido_id: pedido.id,
-          kind: "pronta" as const,
+          kind: "pronta",
           produto_id: it.produto_id,
           nome_snapshot: it.nome,
           qtd: it.qty,
@@ -270,8 +240,7 @@ export async function finalizarPedido(
           prazo_dias: 3,
         }
       : {
-          pedido_id: pedido.id,
-          kind: "personalizado" as const,
+          kind: "personalizado",
           tipo_personalizado_id: it.tipo_id,
           esmalte_id: it.esmalte_id,
           nome_snapshot: `${it.tipo_nome} (${it.esmalte_nome})`,
@@ -281,23 +250,24 @@ export async function finalizarPedido(
           prazo_dias: it.prazo_dias,
         },
   );
-  const { error: errI } = await supabase.from("pedido_itens").insert(itensRows);
-  if (errI) throw errI;
 
-  for (const it of itens) {
-    if (it.kind === "pronta") {
-      const { data: prod } = await supabase
-        .from("produtos")
-        .select("estoque")
-        .eq("id", it.produto_id)
-        .maybeSingle();
-      if (prod) {
-        const novo = Math.max(0, (prod.estoque ?? 0) - it.qty);
-        await supabase.from("produtos").update({ estoque: novo }).eq("id", it.produto_id);
-      }
-    }
-  }
+  const { data, error } = await supabase.rpc("criar_pedido", {
+    _cliente: {
+      nome: c.nome,
+      whatsapp: c.whatsapp,
+      email: c.email ?? "",
+      cep: c.cep ?? "",
+      endereco: c.endereco ?? "",
+      cidade: c.cidade ?? "",
+      estado: c.estado ?? "",
+      observacoes: c.observacoes ?? "",
+    },
+    _itens: itensPayload,
+  });
+  if (error) throw error;
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row?.codigo) throw new Error("Não foi possível registrar o pedido.");
 
   setCart([]);
-  return pedido;
+  return { id: row.id, codigo: row.codigo };
 }
