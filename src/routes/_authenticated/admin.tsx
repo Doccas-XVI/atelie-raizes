@@ -18,6 +18,7 @@ import {
   type Produto,
   type TipoPersonalizado,
 } from "@/lib/api";
+import { PhotoUpload } from "@/components/PhotoUpload";
 import type { Database } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/_authenticated/admin")({
