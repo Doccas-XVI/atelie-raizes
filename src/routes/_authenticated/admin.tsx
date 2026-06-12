@@ -127,6 +127,7 @@ function Admin() {
 
       <main className="mx-auto max-w-7xl px-4 py-6">
         {aba === "kanban" && <Kanban />}
+        {aba === "relatorios" && <Relatorios />}
         {aba === "estoque" && <Estoque />}
         {aba === "produtos" && <ProdutosCRUD />}
         {aba === "esmaltes" && <EsmaltesCRUD />}
