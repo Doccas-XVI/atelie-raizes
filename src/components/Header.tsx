@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useStore, getCart } from "@/lib/store";
+import logoAsset from "@/assets/logo-raizes.jpg.asset.json";
 
 export function Header() {
   const cart = useStore(getCart);
@@ -8,9 +9,16 @@ export function Header() {
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-        <Link to="/" className="flex items-baseline gap-2">
-          <span className="text-base font-semibold tracking-tight">Ateliê Raízes</span>
-          <span className="text-xs text-muted-foreground">cerâmica artesanal</span>
+        <Link to="/" className="flex items-center gap-2.5">
+          <img
+            src={logoAsset.url}
+            alt="Ateliê Raízes"
+            className="h-9 w-9 rounded-full object-cover"
+          />
+          <span className="flex flex-col leading-tight">
+            <span className="text-base font-semibold tracking-tight">Ateliê Raízes</span>
+            <span className="text-xs text-muted-foreground">cerâmica artesanal</span>
+          </span>
         </Link>
         <Link
           to="/checkout"
