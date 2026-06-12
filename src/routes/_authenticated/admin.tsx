@@ -1078,6 +1078,157 @@ function ConteudoBloco({
   );
 }
 
+// ============ Relatórios ============
+function Relatorios() {
+  const { data: pedidos = [], isLoading } = usePedidos();
+
+  const agora = new Date();
+  const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1).getTime();
+  const inicio30 = agora.getTime() - 30 * 24 * 60 * 60 * 1000;
+
+  const entregues = pedidos.filter((p) => p.status === "entregues");
+  const pagos = pedidos.filter((p) => pagoStatus(p) === "pago");
+
+  const totalRecebido = pagos.reduce((a, p) => a + Number(p.total), 0);
+  const totalPendente = pedidos
+    .filter((p) => pagoStatus(p) !== "pago")
+    .reduce((a, p) => a + Number(p.total), 0);
+
+  const noMes = pagos.filter((p) => new Date(p.criado_em).getTime() >= inicioMes);
+  const receitaMes = noMes.reduce((a, p) => a + Number(p.total), 0);
+
+  const ultimos30 = pedidos.filter((p) => new Date(p.criado_em).getTime() >= inicio30);
+  const ticketMedio =
+    entregues.length > 0
+      ? entregues.reduce((a, p) => a + Number(p.total), 0) / entregues.length
+      : 0;
+
+  // Por tipo
+  const porTipo = pedidos.reduce<Record<string, { qtd: number; total: number }>>((acc, p) => {
+    const k = p.tipo;
+    acc[k] = acc[k] || { qtd: 0, total: 0 };
+    acc[k].qtd += 1;
+    acc[k].total += Number(p.total);
+    return acc;
+  }, {});
+
+  // Top produtos
+  const contagem: Record<string, { nome: string; qtd: number; receita: number }> = {};
+  for (const p of pedidos) {
+    for (const it of p.itens ?? []) {
+      const k = it.nome_snapshot || "—";
+      contagem[k] = contagem[k] || { nome: k, qtd: 0, receita: 0 };
+      contagem[k].qtd += it.qtd;
+      contagem[k].receita += Number(it.preco_unit) * it.qtd;
+    }
+  }
+  const topProdutos = Object.values(contagem)
+    .sort((a, b) => b.qtd - a.qtd)
+    .slice(0, 8);
+
+  // Pedidos por mês (últimos 6)
+  const meses: { rotulo: string; total: number }[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(agora.getFullYear(), agora.getMonth() - i, 1);
+    const fim = new Date(agora.getFullYear(), agora.getMonth() - i + 1, 1);
+    const t = pagos
+      .filter((p) => {
+        const ts = new Date(p.criado_em).getTime();
+        return ts >= d.getTime() && ts < fim.getTime();
+      })
+      .reduce((a, p) => a + Number(p.total), 0);
+    meses.push({
+      rotulo: d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", ""),
+      total: t,
+    });
+  }
+  const maxMes = Math.max(1, ...meses.map((m) => m.total));
+
+  if (isLoading) {
+    return <p className="text-sm text-muted-foreground">Carregando relatórios…</p>;
+  }
+
+  return (
+    <div className="space-y-8">
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Stat label="Receita recebida" value={formatBRL(totalRecebido)} />
+        <Stat label="Receita no mês" value={formatBRL(receitaMes)} />
+        <Stat label="Pendente de pagto" value={formatBRL(totalPendente)} />
+        <Stat label="Ticket médio (entregues)" value={formatBRL(ticketMedio)} />
+      </section>
+
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Stat label="Pedidos no total" value={String(pedidos.length)} />
+        <Stat label="Pedidos últimos 30d" value={String(ultimos30.length)} />
+        <Stat label="Entregues" value={String(entregues.length)} />
+        <Stat label="Pagos" value={String(pagos.length)} />
+      </section>
+
+      <section>
+        <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+          Receita por mês (pagos)
+        </h3>
+        <div className="mt-3 flex items-end gap-3 rounded-md border border-border bg-card p-4">
+          {meses.map((m, i) => (
+            <div key={i} className="flex flex-1 flex-col items-center gap-2">
+              <div className="flex h-32 w-full items-end">
+                <div
+                  className="w-full rounded-t bg-primary/80"
+                  style={{ height: `${(m.total / maxMes) * 100}%` }}
+                  title={formatBRL(m.total)}
+                />
+              </div>
+              <div className="text-xs text-muted-foreground">{m.rotulo}</div>
+              <div className="text-xs font-medium tabular-nums">{formatBRL(m.total)}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div>
+          <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+            Por tipo de pedido
+          </h3>
+          <ul className="mt-3 divide-y divide-border rounded-md border border-border bg-card">
+            {Object.entries(porTipo).map(([k, v]) => (
+              <li key={k} className="flex items-center justify-between p-3 text-sm">
+                <span>{k}</span>
+                <span className="text-muted-foreground">
+                  {v.qtd} pedido{v.qtd === 1 ? "" : "s"} ·{" "}
+                  <span className="font-medium text-foreground">{formatBRL(v.total)}</span>
+                </span>
+              </li>
+            ))}
+            {Object.keys(porTipo).length === 0 && (
+              <li className="p-3 text-sm text-muted-foreground">Sem pedidos ainda.</li>
+            )}
+          </ul>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+            Peças mais pedidas
+          </h3>
+          <ul className="mt-3 divide-y divide-border rounded-md border border-border bg-card">
+            {topProdutos.map((p) => (
+              <li key={p.nome} className="flex items-center justify-between gap-3 p-3 text-sm">
+                <span className="truncate">{p.nome}</span>
+                <span className="shrink-0 text-muted-foreground">
+                  {p.qtd}× · {formatBRL(p.receita)}
+                </span>
+              </li>
+            ))}
+            {topProdutos.length === 0 && (
+              <li className="p-3 text-sm text-muted-foreground">Sem itens ainda.</li>
+            )}
+          </ul>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 // ============ Shared UI ============
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
