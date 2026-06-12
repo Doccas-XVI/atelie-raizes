@@ -375,6 +375,7 @@ function ProdutosCRUD() {
       estoque: Number(edit.estoque ?? 0),
       tempo_producao_dias: Number(edit.tempo_producao_dias ?? 3),
       como_e_feita: edit.como_e_feita ?? null,
+      foto_url: edit.foto_url ?? null,
       ativo: edit.ativo ?? true,
       ordem: Number(edit.ordem ?? 0),
     };
