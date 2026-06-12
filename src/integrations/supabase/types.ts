@@ -492,6 +492,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      list_admins: {
+        Args: never
+        Returns: {
+          email: string
+          is_admin: boolean
+          user_id: string
+        }[]
+      }
+      promote_admin_by_email: { Args: { _email: string }; Returns: undefined }
+      revoke_admin: { Args: { _user_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "artesa"
