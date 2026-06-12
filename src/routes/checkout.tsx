@@ -20,21 +20,60 @@ export const Route = createFileRoute("/checkout")({
   component: Checkout,
 });
 
+const UFS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
+
 function Checkout() {
   const navigate = useNavigate();
   const cart = useCart();
-  const [nome, setNome] = useState("");
-  const [whats, setWhats] = useState("");
+  const [form, setForm] = useState({
+    nome: "",
+    whatsapp: "",
+    email: "",
+    cep: "",
+    endereco: "",
+    cidade: "",
+    estado: "",
+    observacoes: "",
+  });
   const [erro, setErro] = useState("");
   const [enviando, setEnviando] = useState(false);
+  const [buscandoCep, setBuscandoCep] = useState(false);
 
   const total = cartTotal(cart);
   const prazo = cartPrazo(cart);
 
+  function set<K extends keyof typeof form>(k: K, v: string) {
+    setForm((f) => ({ ...f, [k]: v }));
+  }
+
+  async function buscarCep(cepRaw: string) {
+    const cep = cepRaw.replace(/\D/g, "");
+    if (cep.length !== 8) return;
+    setBuscandoCep(true);
+    try {
+      const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const d = await r.json();
+      if (!d.erro) {
+        setForm((f) => ({
+          ...f,
+          endereco: d.logradouro
+            ? `${d.logradouro}${d.bairro ? " — " + d.bairro : ""}`
+            : f.endereco,
+          cidade: d.localidade ?? f.cidade,
+          estado: d.uf ?? f.estado,
+        }));
+      }
+    } catch {
+      /* silencioso */
+    } finally {
+      setBuscandoCep(false);
+    }
+  }
+
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
-    if (!nome.trim() || !whats.trim()) {
+    if (!form.nome.trim() || !form.whatsapp.trim()) {
       setErro("Preencha nome e WhatsApp para enviar o pedido.");
       return;
     }
@@ -44,7 +83,16 @@ function Checkout() {
     }
     setEnviando(true);
     try {
-      const pedido = await finalizarPedido(nome.trim(), whats.trim());
+      const pedido = await finalizarPedido({
+        nome: form.nome.trim(),
+        whatsapp: form.whatsapp.trim(),
+        email: form.email.trim(),
+        cep: form.cep.trim(),
+        endereco: form.endereco.trim(),
+        cidade: form.cidade.trim(),
+        estado: form.estado.trim(),
+        observacoes: form.observacoes.trim(),
+      });
       navigate({ to: "/sucesso", search: { id: pedido.codigo } });
     } catch (err) {
       setErro(err instanceof Error ? err.message : "Erro ao enviar pedido.");
@@ -135,32 +183,59 @@ function Checkout() {
         </div>
       </div>
 
-      <form onSubmit={enviar} className="mt-6 space-y-3">
-        <label className="block">
-          <span className="text-sm font-medium">Nome</span>
-          <input
-            type="text"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            required
-            minLength={2}
-            maxLength={120}
-            className="mt-1 w-full rounded-md border border-input bg-card px-3 py-3 text-base outline-none focus:border-primary"
-            placeholder="Seu nome"
+      <form onSubmit={enviar} className="mt-6 space-y-4">
+        <fieldset className="space-y-3">
+          <legend className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+            Contato
+          </legend>
+          <Input label="Nome *" value={form.nome} onChange={(v) => set("nome", v)} required minLength={2} maxLength={120} placeholder="Seu nome" />
+          <Input label="WhatsApp *" value={form.whatsapp} onChange={(v) => set("whatsapp", v)} required minLength={8} maxLength={30} placeholder="(11) 99999-9999" type="tel" />
+          <Input label="Email (opcional)" value={form.email} onChange={(v) => set("email", v)} maxLength={120} placeholder="voce@email.com" type="email" />
+        </fieldset>
+
+        <fieldset className="space-y-3">
+          <legend className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+            Endereço de entrega (opcional)
+          </legend>
+          <Input
+            label={buscandoCep ? "CEP (buscando…)" : "CEP"}
+            value={form.cep}
+            onChange={(v) => {
+              set("cep", v);
+              if (v.replace(/\D/g, "").length === 8) buscarCep(v);
+            }}
+            maxLength={9}
+            placeholder="00000-000"
+            inputMode="numeric"
           />
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium">WhatsApp</span>
-          <input
-            type="tel"
-            value={whats}
-            onChange={(e) => setWhats(e.target.value)}
-            required
-            minLength={8}
-            maxLength={30}
-            inputMode="tel"
+          <Input label="Endereço e bairro" value={form.endereco} onChange={(v) => set("endereco", v)} maxLength={200} placeholder="Rua, número, bairro" />
+          <div className="grid grid-cols-[1fr_90px] gap-3">
+            <Input label="Cidade" value={form.cidade} onChange={(v) => set("cidade", v)} maxLength={80} />
+            <label className="block text-sm">
+              <span className="font-medium">UF</span>
+              <select
+                value={form.estado}
+                onChange={(e) => set("estado", e.target.value)}
+                className="mt-1 h-[46px] w-full rounded-md border border-input bg-card px-2 text-base outline-none focus:border-primary"
+              >
+                <option value="">—</option>
+                {UFS.map((uf) => (
+                  <option key={uf} value={uf}>{uf}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </fieldset>
+
+        <label className="block text-sm">
+          <span className="font-medium">Observações (opcional)</span>
+          <textarea
+            value={form.observacoes}
+            onChange={(e) => set("observacoes", e.target.value)}
+            rows={3}
+            maxLength={500}
+            placeholder="Algo que a artesã precisa saber?"
             className="mt-1 w-full rounded-md border border-input bg-card px-3 py-3 text-base outline-none focus:border-primary"
-            placeholder="(11) 99999-9999"
           />
         </label>
 
@@ -175,5 +250,36 @@ function Checkout() {
         </button>
       </form>
     </PageContainer>
+  );
+}
+
+function Input({
+  label, value, onChange, type = "text", required, minLength, maxLength, placeholder, inputMode,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  placeholder?: string;
+  inputMode?: "text" | "tel" | "email" | "numeric";
+}) {
+  return (
+    <label className="block text-sm">
+      <span className="font-medium">{label}</span>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required={required}
+        minLength={minLength}
+        maxLength={maxLength}
+        placeholder={placeholder}
+        inputMode={inputMode}
+        className="mt-1 w-full rounded-md border border-input bg-card px-3 py-3 text-base outline-none focus:border-primary"
+      />
+    </label>
   );
 }
