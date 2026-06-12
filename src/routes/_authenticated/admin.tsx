@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: Admin,
 });
 
-type Aba = "kanban" | "relatorios" | "estoque" | "produtos" | "esmaltes" | "tipos" | "faq" | "conteudo";
+type Aba = "kanban" | "relatorios" | "estoque" | "produtos" | "esmaltes" | "tipos" | "faq" | "conteudo" | "admins";
 
 const ABAS: { id: Aba; label: string }[] = [
   { id: "kanban", label: "Pedidos" },
@@ -39,6 +39,7 @@ const ABAS: { id: Aba; label: string }[] = [
   { id: "tipos", label: "Personalizados" },
   { id: "faq", label: "FAQ" },
   { id: "conteudo", label: "Conteúdo" },
+  { id: "admins", label: "Admins" },
 ];
 
 function Admin() {
