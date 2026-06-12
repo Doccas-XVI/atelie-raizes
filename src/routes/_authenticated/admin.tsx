@@ -135,6 +135,7 @@ function Admin() {
         {aba === "tipos" && <TiposCRUD />}
         {aba === "faq" && <FAQCRUD />}
         {aba === "conteudo" && <ConteudoCMS />}
+        {aba === "admins" && <AdminsCRUD currentEmail={email} />}
       </main>
     </div>
   );
