@@ -643,11 +643,11 @@ function EsmaltesCRUD() {
                 />
               </div>
             </Field>
-            <Field label="Foto (URL)">
-              <input
-                value={edit.foto_url ?? ""}
-                onChange={(ev) => setEdit({ ...edit, foto_url: ev.target.value })}
-                className="input"
+            <Field label="Foto">
+              <PhotoUpload
+                value={edit.foto_url}
+                onChange={(url) => setEdit({ ...edit, foto_url: url })}
+                folder="esmaltes"
               />
             </Field>
             <label className="flex items-center gap-2 text-sm">
