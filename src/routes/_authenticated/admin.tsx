@@ -509,6 +509,21 @@ function ProdutosCRUD() {
                 className="input"
               />
             </Field>
+            <Field label="Foto principal (URL — cole link público da imagem)">
+              <input
+                value={edit.foto_url ?? ""}
+                onChange={(e) => setEdit({ ...edit, foto_url: e.target.value })}
+                placeholder="https://..."
+                className="input"
+              />
+              {edit.foto_url && (
+                <img
+                  src={edit.foto_url}
+                  alt=""
+                  className="mt-2 h-28 w-28 rounded-md border border-border object-cover"
+                />
+              )}
+            </Field>
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
