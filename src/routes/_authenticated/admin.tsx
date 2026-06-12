@@ -18,6 +18,7 @@ import {
   type Produto,
   type TipoPersonalizado,
 } from "@/lib/api";
+import { PhotoUpload } from "@/components/PhotoUpload";
 import type { Database } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -511,20 +512,12 @@ function ProdutosCRUD() {
                 className="input"
               />
             </Field>
-            <Field label="Foto principal (URL — cole link público da imagem)">
-              <input
-                value={edit.foto_url ?? ""}
-                onChange={(e) => setEdit({ ...edit, foto_url: e.target.value })}
-                placeholder="https://..."
-                className="input"
+            <Field label="Foto principal">
+              <PhotoUpload
+                value={edit.foto_url}
+                onChange={(url) => setEdit({ ...edit, foto_url: url })}
+                folder="produtos"
               />
-              {edit.foto_url && (
-                <img
-                  src={edit.foto_url}
-                  alt=""
-                  className="mt-2 h-28 w-28 rounded-md border border-border object-cover"
-                />
-              )}
             </Field>
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -650,11 +643,11 @@ function EsmaltesCRUD() {
                 />
               </div>
             </Field>
-            <Field label="Foto (URL)">
-              <input
-                value={edit.foto_url ?? ""}
-                onChange={(ev) => setEdit({ ...edit, foto_url: ev.target.value })}
-                className="input"
+            <Field label="Foto">
+              <PhotoUpload
+                value={edit.foto_url}
+                onChange={(url) => setEdit({ ...edit, foto_url: url })}
+                folder="esmaltes"
               />
             </Field>
             <label className="flex items-center gap-2 text-sm">
