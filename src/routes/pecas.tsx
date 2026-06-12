@@ -4,10 +4,9 @@ import { PageContainer } from "@/components/Header";
 import {
   addProntaToCart,
   formatBRL,
-  getProdutos,
-  useStore,
-  type Product,
-} from "@/lib/store";
+  useProdutosPublicos,
+  type Produto,
+} from "@/lib/api";
 
 export const Route = createFileRoute("/pecas")({
   head: () => ({
@@ -24,21 +23,22 @@ export const Route = createFileRoute("/pecas")({
 });
 
 function Pecas() {
-  const produtos = useStore(getProdutos).filter((p) => p.estoque > 0);
+  const { data: produtos = [], isLoading } = useProdutosPublicos();
 
   return (
     <PageContainer>
       <h1 className="text-xl font-semibold">Pronta entrega</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        {produtos.length} {produtos.length === 1 ? "peça disponível" : "peças disponíveis"}.
-        Quando esgota, sai do catálogo.
+        {isLoading
+          ? "Carregando peças…"
+          : `${produtos.length} ${produtos.length === 1 ? "peça disponível" : "peças disponíveis"}. Quando esgota, sai do catálogo.`}
       </p>
 
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {produtos.map((p) => (
           <Card key={p.id} produto={p} />
         ))}
-        {produtos.length === 0 && (
+        {!isLoading && produtos.length === 0 && (
           <p className="text-sm text-muted-foreground">
             Sem estoque no momento. Veja a aba de encomendas personalizadas.
           </p>
@@ -48,14 +48,15 @@ function Pecas() {
   );
 }
 
-function Card({ produto }: { produto: Product }) {
+function Card({ produto }: { produto: Produto }) {
   const [open, setOpen] = useState(false);
   const [added, setAdded] = useState(false);
+  const inicial = produto.nome.charAt(0).toUpperCase();
 
   return (
     <article className="flex flex-col rounded-md border border-border bg-card">
-      <div className="flex h-40 items-center justify-center bg-surface text-5xl">
-        <span aria-hidden>{produto.emoji}</span>
+      <div className="flex h-40 items-center justify-center bg-surface text-4xl font-light text-muted-foreground">
+        <span aria-hidden>{inicial}</span>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex items-baseline justify-between gap-2">
@@ -63,27 +64,31 @@ function Card({ produto }: { produto: Product }) {
           <span className="text-base font-semibold">{formatBRL(produto.preco)}</span>
         </div>
         <p className="text-xs text-muted-foreground">
-          {produto.estoque} {produto.estoque === 1 ? "em estoque" : "em estoque"}
+          {produto.estoque} em estoque
         </p>
 
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="mt-1 text-left text-sm font-medium text-primary underline-offset-4 hover:underline"
-          aria-expanded={open}
-        >
-          {open ? "− Ocultar" : "+ Como essa peça é feita"}
-        </button>
-        {open && (
-          <p className="rounded-sm bg-surface p-3 text-sm leading-relaxed text-foreground/85">
-            {produto.comoEFeita}
-          </p>
+        {produto.como_e_feita && (
+          <>
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              className="mt-1 text-left text-sm font-medium text-primary underline-offset-4 hover:underline"
+              aria-expanded={open}
+            >
+              {open ? "− Ocultar" : "+ Como essa peça é feita"}
+            </button>
+            {open && (
+              <p className="rounded-sm bg-surface p-3 text-sm leading-relaxed text-foreground/85">
+                {produto.como_e_feita}
+              </p>
+            )}
+          </>
         )}
 
         <button
           type="button"
           onClick={() => {
-            addProntaToCart(produto);
+            addProntaToCart({ id: produto.id, nome: produto.nome, preco: produto.preco });
             setAdded(true);
             setTimeout(() => setAdded(false), 1500);
           }}

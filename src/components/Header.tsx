@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { useStore, getCart } from "@/lib/store";
+import { useCart } from "@/lib/api";
 import logoAsset from "@/assets/logo-raizes.jpg.asset.json";
 
 export function Header() {
-  const cart = useStore(getCart);
+  const cart = useCart();
   const count = cart.reduce((a, i) => a + (i.kind === "pronta" ? i.qty : 1), 0);
 
   return (

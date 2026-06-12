@@ -6,10 +6,9 @@ import {
   cartTotal,
   finalizarPedido,
   formatBRL,
-  getCart,
   removeFromCart,
-  useStore,
-} from "@/lib/store";
+  useCart,
+} from "@/lib/api";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -23,16 +22,18 @@ export const Route = createFileRoute("/checkout")({
 
 function Checkout() {
   const navigate = useNavigate();
-  const cart = useStore(getCart);
+  const cart = useCart();
   const [nome, setNome] = useState("");
   const [whats, setWhats] = useState("");
   const [erro, setErro] = useState("");
+  const [enviando, setEnviando] = useState(false);
 
   const total = cartTotal(cart);
   const prazo = cartPrazo(cart);
 
-  function enviar(e: React.FormEvent) {
+  async function enviar(e: React.FormEvent) {
     e.preventDefault();
+    setErro("");
     if (!nome.trim() || !whats.trim()) {
       setErro("Preencha nome e WhatsApp para enviar o pedido.");
       return;
@@ -41,8 +42,15 @@ function Checkout() {
       setErro("Seu pedido está vazio.");
       return;
     }
-    const pedido = finalizarPedido(nome.trim(), whats.trim());
-    navigate({ to: "/sucesso", search: { id: pedido.id } });
+    setEnviando(true);
+    try {
+      const pedido = await finalizarPedido(nome.trim(), whats.trim());
+      navigate({ to: "/sucesso", search: { id: pedido.codigo } });
+    } catch (err) {
+      setErro(err instanceof Error ? err.message : "Erro ao enviar pedido.");
+    } finally {
+      setEnviando(false);
+    }
   }
 
   if (cart.length === 0) {
@@ -83,20 +91,16 @@ function Checkout() {
                   <div className="text-base font-medium">
                     {it.nome}
                     {it.qty > 1 && (
-                      <span className="ml-2 text-sm text-muted-foreground">
-                        × {it.qty}
-                      </span>
+                      <span className="ml-2 text-sm text-muted-foreground">× {it.qty}</span>
                     )}
                   </div>
                   <div className="text-xs text-muted-foreground">Pronta entrega</div>
                 </>
               ) : (
                 <>
-                  <div className="text-base font-medium">
-                    {it.tipo} personalizada
-                  </div>
+                  <div className="text-base font-medium">{it.tipo_nome} personalizada</div>
                   <div className="text-xs text-muted-foreground">
-                    Esmalte {it.esmalte} · {it.prazoDias} dias
+                    Esmalte {it.esmalte_nome} · {it.prazo_dias} dias
                   </div>
                   <div className="mt-1 text-sm">"{it.descricao}"</div>
                 </>
@@ -139,6 +143,8 @@ function Checkout() {
             value={nome}
             onChange={(e) => setNome(e.target.value)}
             required
+            minLength={2}
+            maxLength={120}
             className="mt-1 w-full rounded-md border border-input bg-card px-3 py-3 text-base outline-none focus:border-primary"
             placeholder="Seu nome"
           />
@@ -150,6 +156,8 @@ function Checkout() {
             value={whats}
             onChange={(e) => setWhats(e.target.value)}
             required
+            minLength={8}
+            maxLength={30}
             inputMode="tel"
             className="mt-1 w-full rounded-md border border-input bg-card px-3 py-3 text-base outline-none focus:border-primary"
             placeholder="(11) 99999-9999"
@@ -160,9 +168,10 @@ function Checkout() {
 
         <button
           type="submit"
-          className="w-full rounded-md bg-primary px-4 py-3.5 text-base font-medium text-primary-foreground hover:bg-primary/90"
+          disabled={enviando}
+          className="w-full rounded-md bg-primary px-4 py-3.5 text-base font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
         >
-          Enviar pedido
+          {enviando ? "Enviando…" : "Enviar pedido"}
         </button>
       </form>
     </PageContainer>
