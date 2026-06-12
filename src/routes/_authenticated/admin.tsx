@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: Admin,
 });
 
-type Aba = "kanban" | "relatorios" | "estoque" | "produtos" | "esmaltes" | "tipos" | "faq" | "conteudo";
+type Aba = "kanban" | "relatorios" | "estoque" | "produtos" | "esmaltes" | "tipos" | "faq" | "conteudo" | "admins";
 
 const ABAS: { id: Aba; label: string }[] = [
   { id: "kanban", label: "Pedidos" },
@@ -39,6 +39,7 @@ const ABAS: { id: Aba; label: string }[] = [
   { id: "tipos", label: "Personalizados" },
   { id: "faq", label: "FAQ" },
   { id: "conteudo", label: "Conteúdo" },
+  { id: "admins", label: "Admins" },
 ];
 
 function Admin() {
@@ -134,6 +135,7 @@ function Admin() {
         {aba === "tipos" && <TiposCRUD />}
         {aba === "faq" && <FAQCRUD />}
         {aba === "conteudo" && <ConteudoCMS />}
+        {aba === "admins" && <AdminsCRUD currentEmail={email} />}
       </main>
     </div>
   );
@@ -1270,5 +1272,125 @@ function Modal({
         {children}
       </div>
     </div>
+  );
+}
+
+// ============ Admins ============
+type AdminRow = { user_id: string; email: string; is_admin: boolean };
+
+function AdminsCRUD({ currentEmail }: { currentEmail: string }) {
+  const [rows, setRows] = useState<AdminRow[] | null>(null);
+  const [email, setEmail] = useState("");
+  const [erro, setErro] = useState("");
+  const [ok, setOk] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function load() {
+    setErro("");
+    const { data, error } = await supabase.rpc("list_admins");
+    if (error) {
+      setErro(error.message);
+      setRows([]);
+      return;
+    }
+    setRows((data ?? []) as AdminRow[]);
+  }
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function promover(e: React.FormEvent) {
+    e.preventDefault();
+    setErro("");
+    setOk("");
+    setBusy(true);
+    const { error } = await supabase.rpc("promote_admin_by_email", { _email: email.trim() });
+    setBusy(false);
+    if (error) {
+      setErro(error.message);
+      return;
+    }
+    setOk(`${email} agora é admin.`);
+    setEmail("");
+    load();
+  }
+
+  async function revogar(user_id: string, alvoEmail: string) {
+    if (!confirm(`Remover acesso admin de ${alvoEmail}?`)) return;
+    setErro("");
+    setOk("");
+    const { error } = await supabase.rpc("revoke_admin", { _user_id: user_id });
+    if (error) {
+      setErro(error.message);
+      return;
+    }
+    setOk(`Acesso admin de ${alvoEmail} removido.`);
+    load();
+  }
+
+  const admins = (rows ?? []).filter((r) => r.is_admin);
+
+  return (
+    <section className="max-w-2xl space-y-6">
+      <div className="rounded-md border border-border bg-card p-4">
+        <h2 className="text-base font-semibold">Nomear novo admin</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          A pessoa precisa primeiro criar o acesso em <code>/auth</code> com o email
+          dela. Depois, informe esse email aqui para promovê-la a admin.
+        </p>
+        <form onSubmit={promover} className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(ev) => setEmail(ev.target.value)}
+            placeholder="email@exemplo.com"
+            className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+          <button
+            type="submit"
+            disabled={busy}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+          >
+            {busy ? "Aguarde…" : "Promover a admin"}
+          </button>
+        </form>
+        {ok && <p className="mt-2 text-sm text-emerald-600">{ok}</p>}
+        {erro && <p className="mt-2 text-sm text-destructive">{erro}</p>}
+      </div>
+
+      <div className="rounded-md border border-border bg-card p-4">
+        <h2 className="text-base font-semibold">Admins atuais</h2>
+        {rows === null ? (
+          <p className="mt-3 text-sm text-muted-foreground">Carregando…</p>
+        ) : admins.length === 0 ? (
+          <p className="mt-3 text-sm text-muted-foreground">Nenhum admin.</p>
+        ) : (
+          <ul className="mt-3 divide-y divide-border">
+            {admins.map((r) => (
+              <li
+                key={r.user_id}
+                className="flex items-center justify-between gap-3 py-2 text-sm"
+              >
+                <span>
+                  {r.email}
+                  {r.email === currentEmail && (
+                    <span className="ml-2 text-xs text-muted-foreground">(você)</span>
+                  )}
+                </span>
+                {r.email !== currentEmail && (
+                  <button
+                    onClick={() => revogar(r.user_id, r.email)}
+                    className="text-xs text-destructive hover:underline"
+                  >
+                    Remover admin
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
   );
 }
