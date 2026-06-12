@@ -2,12 +2,12 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageContainer } from "@/components/Header";
 import {
-  ESMALTES,
-  TIPOS_PERSONALIZADO,
   formatBRL,
   getCart,
   setCart,
-} from "@/lib/store";
+  useEsmaltes,
+  useTipos,
+} from "@/lib/api";
 
 export const Route = createFileRoute("/personalizado")({
   head: () => ({
@@ -24,12 +24,14 @@ export const Route = createFileRoute("/personalizado")({
 
 function Personalizado() {
   const navigate = useNavigate();
+  const { data: tipos = [] } = useTipos();
+  const { data: esmaltes = [] } = useEsmaltes();
   const [tipoId, setTipoId] = useState<string>("");
   const [esmalteId, setEsmalteId] = useState<string>("");
   const [descricao, setDescricao] = useState("");
 
-  const tipo = TIPOS_PERSONALIZADO.find((t) => t.id === tipoId);
-  const esmalte = ESMALTES.find((e) => e.id === esmalteId);
+  const tipo = tipos.find((t) => t.id === tipoId);
+  const esmalte = esmaltes.find((e) => e.id === esmalteId);
   const podeAdicionar = !!tipo && !!esmalte;
 
   function adicionar() {
@@ -39,12 +41,14 @@ function Personalizado() {
       ...cart,
       {
         kind: "personalizado",
-        id: `C${Date.now().toString(36)}`,
-        tipo: tipo.nome,
-        preco: tipo.preco,
-        esmalte: esmalte.nome,
+        cart_id: `C${Date.now().toString(36)}`,
+        tipo_id: tipo.id,
+        tipo_nome: tipo.nome,
+        preco: Number(tipo.preco_base),
+        esmalte_id: esmalte.id,
+        esmalte_nome: esmalte.nome,
         descricao: descricao.trim() || "(sem texto/desenho)",
-        prazoDias: tipo.prazoDias,
+        prazo_dias: tipo.prazo_dias,
       },
     ]);
     navigate({ to: "/checkout" });
@@ -59,7 +63,7 @@ function Personalizado() {
 
       <Step n={1} title="Tipo de peça">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {TIPOS_PERSONALIZADO.map((t) => {
+          {tipos.map((t) => {
             const ativo = tipoId === t.id;
             return (
               <button
@@ -67,17 +71,15 @@ function Personalizado() {
                 type="button"
                 onClick={() => setTipoId(t.id)}
                 className={`flex flex-col rounded-md border p-3 text-left transition-colors ${
-                  ativo
-                    ? "border-primary bg-primary/5"
-                    : "border-border bg-card hover:bg-surface"
+                  ativo ? "border-primary bg-primary/5" : "border-border bg-card hover:bg-surface"
                 }`}
               >
-                <div className="flex h-20 items-center justify-center rounded-sm bg-surface text-3xl">
-                  {t.id === "caneca" ? "☕" : t.id === "prato" ? "🍽️" : "🥣"}
+                <div className="flex h-20 items-center justify-center rounded-sm bg-surface text-2xl font-light text-muted-foreground">
+                  {t.nome.charAt(0).toUpperCase()}
                 </div>
                 <div className="mt-2 text-sm font-medium">{t.nome}</div>
                 <div className="text-xs text-muted-foreground">
-                  {formatBRL(t.precoMin)}–{formatBRL(t.precoMax)}
+                  {formatBRL(t.preco_min)}–{formatBRL(t.preco_max)}
                 </div>
               </button>
             );
@@ -87,7 +89,7 @@ function Personalizado() {
 
       <Step n={2} title="Cor / esmalte">
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-          {ESMALTES.map((e) => {
+          {esmaltes.map((e) => {
             const ativo = esmalteId === e.id;
             return (
               <button
@@ -99,11 +101,19 @@ function Personalizado() {
                 }`}
                 aria-pressed={ativo}
               >
-                <span
-                  className="block h-12 w-12 rounded-full border border-border"
-                  style={{ backgroundColor: e.cor }}
-                  aria-hidden
-                />
+                {e.foto_url ? (
+                  <img
+                    src={e.foto_url}
+                    alt={e.nome}
+                    className="h-12 w-12 rounded-full border border-border object-cover"
+                  />
+                ) : (
+                  <span
+                    className="block h-12 w-12 rounded-full border border-border"
+                    style={{ backgroundColor: e.cor_hex }}
+                    aria-hidden
+                  />
+                )}
                 <span className="text-center text-xs leading-tight">{e.nome}</span>
               </button>
             );
@@ -125,13 +135,11 @@ function Personalizado() {
         <div className="mt-6 rounded-md border border-border bg-surface p-4">
           <div className="flex items-baseline justify-between">
             <span className="text-sm text-muted-foreground">Preço estimado</span>
-            <span className="text-lg font-semibold">{formatBRL(tipo.preco)}</span>
+            <span className="text-lg font-semibold">{formatBRL(tipo.preco_base)}</span>
           </div>
           <div className="mt-1 flex items-baseline justify-between">
             <span className="text-sm text-muted-foreground">Prazo de produção</span>
-            <span className="text-base font-medium">
-              {tipo.prazoDias} dias úteis
-            </span>
+            <span className="text-base font-medium">{tipo.prazo_dias} dias úteis</span>
           </div>
         </div>
       )}
