@@ -24,3 +24,6 @@ Mais do que desenvolver uma aplicação, o projeto envolveu compreender as neces
 - Supabase
 - Tailwind CSS
 - Vite
+
+
+https://atelie-raizes.lovable.app/
